@@ -1,0 +1,42 @@
+timescale 1ns/1ps // Đơn vị thời gian là ns, độ chính xác đến ps
+
+module tb_bfsk_modulator;
+
+    // Khai báo các tín hiệu kết nối với mạch chính
+    reg clk;
+    reg rst;
+    reg data_in;
+    wire fsk_out;
+
+    // Gọi mạch chính vào trong testbench (gọi là Dập mẫu - Instantiate)
+    bfsk_modulator uut (
+        .clk(clk),
+        .rst(rst),
+        .data_in(data_in),
+        .fsk_out(fsk_out)
+    );
+
+    // Tạo xung Clock hệ thống: Cứ mỗi 10ns đảo chiều một lần (Chu kỳ 20ns = 50MHz)
+    always #10 clk = ~clk;
+
+    // Kịch bản kiểm thử hệ thống
+    initial begin
+        // Bước 1: Khởi tạo giá trị ban đầu cho các ngõ vào
+        clk = 0;
+        rst = 1;        // Bật reset để mạch xóa dữ liệu cũ
+        data_in = 0;
+        #40;            // Chờ 40ns
+        
+        rst = 0;        // Tắt reset để mạch bắt đầu chạy dữ liệu thực tế
+
+        // Bước 2: Nạp luồng dữ liệu nhị phân để kiểm tra
+        data_in = 0; #300; // Truyền bit 0 trong vòng 300ns
+        data_in = 1; #300; // Truyền bit 1 trong vòng 300ns
+        data_in = 0; #300; // Truyền lại bit 0 trong 300ns
+        data_in = 1; #300; // Truyền lại bit 1 trong 300ns
+        
+        // Kết thúc quá trình mô phỏng
+        $stop;
+    end
+
+endmodule
